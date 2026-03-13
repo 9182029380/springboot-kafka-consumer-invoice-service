@@ -1,0 +1,48 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: invoice-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3308/invoice_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: invuser
+    password: invpass123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+      group-id: invoice-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            type:
+              mapping: order-event:com.example.invoice_service.dto.OrderEvent
+
+    listener:
+      ack-mode: manual
+
+logging:
+  level:
+    com.invoiceservice: DEBUG
+    org.springframework.kafka: INFO
